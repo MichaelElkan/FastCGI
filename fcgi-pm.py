@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-s','--socket', help='Specify the socket.')
 parser.add_argument('-q','--queue-size', help='Specify the queue size.')
 parser.add_argument('-c', '--count', help='Specify the count.')
-parser.add_argument('-e', '--executable', help='Specify the executable and any of its arguments.')
+parser.add_argument('-e', '--executable', help='Specify the executable and any of its arguments. The executable name and all of its arguments must be in quotes.')
 parser.add_argument('-v', '--verbose', action='store_true', help='Specify if you want verbose output.')
 args = parser.parse_args()
 
@@ -27,20 +27,28 @@ QUEUESIZE = int(args.queue_size)
 COUNT = int(args.count)
 EXECUTABLE = args.executable
 VERBOSE = args.verbose
+
 # Process list for clean up
 PROCESS_LIST = []
 
 
 def main():
-    SOCKET = bindport() 
+    
     if VERBOSE:
         log("Starting Fcgi-pm at " + str(datetime.now()))
+   
+    # calls method to bind port
+    bindport()
+
+    # sets number of process to happen in parallel 
     pool = multiprocessing.Pool(processes=COUNT)
+
+    # sets the number of total tasks to be completed
     tasks = range(QUEUESIZE)
-    results = []
-    r = pool.map_async(work, tasks, callback=results.append)
+
+    # runs the tasks in parallel 
+    r = pool.map_async(work, tasks)
     r.wait()
-    print(results)
 
 # binds socket and waits for connection
 def bindport():
@@ -55,11 +63,19 @@ def bindport():
     except socket.error as msg:
         print('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1])
         sys.exit()
+    
     if VERBOSE:
-        log("Socket succesfully bound: " + str(SOCKET) + " at " + str(datetime.now()) )
+        log("Socket successfully bound: " + str(SOCKET) + " at " + str(datetime.now()) )
     # waits for connection to be made
+    
+    if VERBOSE:
+        log("Waiting for connection")
+    
     SOCKET.listen(5)
     cli, addr = SOCKET.accept()
+   
+    if VERBOSE:
+        log("Connected")
 
 # main driver of fcgi executables
 def work(value):
@@ -69,7 +85,8 @@ def work(value):
     # saves the process ID to use for clean up if needed
     PROCESS_ID = process.pid
     PROCESS_LIST.append(PROCESS_ID)
-    # logging if desired
+    
+
     if VERBOSE:
         log("Starting process " + str(PROCESS_ID) + " at " + str(datetime.now()))
 
