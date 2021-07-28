@@ -1,5 +1,9 @@
 #initial commit
-#todo: mandatory arguments
+#todo: 
+# docker
+# bind to port
+# exit clean up
+# variable logging verbosity
 
 import argparse
 import multiprocessing
