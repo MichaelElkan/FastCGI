@@ -1,5 +1,5 @@
 # getting base image ubuntu
-FROM ubuntu
+FROM python:3
 
 EXPOSE 8888
 
@@ -8,7 +8,13 @@ ARG count
 ARG socket
 ARG queue-size
 
-RUN apt-get update && apt-get install -y python3
+WORKDIR /usr/src/app
 
-CMD python3 fcgi-pm.py --socket=${socket} --count=${count} --queue-size=${queue-size} --executable=${executable}
+COPY . .
 
+
+#RUN apt-get update && apt-get install -y python3
+
+CMD fcgi-pm.py --socket=${socket} --count=${count} --queue-size=${queue-size} --executable=${executable}
+
+ENTRYPOINT [ "python3" ]
