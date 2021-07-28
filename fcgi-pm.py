@@ -15,10 +15,15 @@ args = parser.parse_args()
 SOCKET = args.socket
 QUEUESIZE = int(args.queue_size)
 COUNT = int(args.count)
+EXECUTABLE = args.executable
+print(SOCKET)
 
 def work(value):
-    #return value
-    return subprocess.Popen('bash /home/melkan/work/FastCGI/testexe.sh', shell=True,)
+    process = subprocess.Popen(EXECUTABLE, shell=True,stdin=subprocess.PIPE)
+    process.communicate(bytes(SOCKET, encoding='utf-8'))
+    process.wait()
+    return process
+
 
 pool = multiprocessing.Pool(processes=COUNT)
 tasks = range(QUEUESIZE)
